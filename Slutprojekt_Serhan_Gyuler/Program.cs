@@ -64,7 +64,7 @@ namespace Slutprojekt_Serhan_Gyuler
                         AverageSalary();
                         break;
                     case "9":
-                        StoreProcedure();
+                        GetImportnatInfoOnStudent();
                         break;
                     case "10":
                         AddGradeToStudent();
@@ -77,108 +77,123 @@ namespace Slutprojekt_Serhan_Gyuler
                         Console.ReadKey();
                         break;
                 }
+                Console.WriteLine("\nPress any key to return to the menu...");
+                Console.ReadKey();
+                Console.Clear();
             }
         }
 
         // Case 1
         public static void TeachersInDifferentDepartments()
         {
-            using (var dBManager = new SchoolDbContext())
+            try
             {
-                var subjectsWithTeachers = dBManager.Subjects
-                    .Where(s => s.Employee.Profession == "Teacher")
-                    .Select(s => new
-                    {
-                        s.SubjectName,
-                        TeacherName = s.Employee.FirstName + " " + s.Employee.LastName
-                    })
-                    .ToList();
-
-                foreach (var item in subjectsWithTeachers)
+                using (var dBManager = new SchoolDbContext())
                 {
-                    Console.WriteLine($"Subject: {item.SubjectName}, Teacher: {item.TeacherName}");
+                    var subjectsWithTeachers = dBManager.Subjects
+                        .Where(s => s.Employee != null && s.Employee.Profession == "Teacher")
+                        .Select(s => new
+                        {
+                            s.SubjectName,
+                            TeacherName = s.Employee!.FirstName + " " + s.Employee.LastName
+                        })
+                        .ToList();
+
+                    foreach (var item in subjectsWithTeachers)
+                    {
+                        Console.WriteLine($"Subject: {item.SubjectName}, Teacher: {item.TeacherName}");
+                    }
                 }
             }
-
-            Console.WriteLine("\nPress any key to return to the menu...");
-            Console.ReadKey();
-            Console.Clear();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         // Case 2
         public static void InformationOnStudents()
         {
-            using (var dBManager = new SchoolDbContext())
+            try
             {
-                var studentsInformations = dBManager.Students
-                    .Select(s => new
-                    {
-                        s.FirstName,
-                        s.LastName,
-                        ClassName = s.Class.ClassName
-                    })
-                    .ToList();
-
-                foreach (var student in studentsInformations)
+                using (var dBManager = new SchoolDbContext())
                 {
-                    Console.WriteLine($"{student.FirstName} {student.LastName} ~ Class: {student.ClassName}");
+                    var studentsInformations = dBManager.Students
+                        .Select(s => new
+                        {
+                            s.FirstName,
+                            s.LastName,
+                            s.Class.ClassName
+                        })
+                        .ToList();
+
+                    foreach (var student in studentsInformations)
+                    {
+                        Console.WriteLine($"{student.FirstName} {student.LastName} ~ Class: {student.ClassName}");
+                    }
                 }
             }
-
-            Console.WriteLine("\nPress any key to return to the menu...");
-            Console.ReadKey();
-            Console.Clear();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         // Case 3
         public static void ActiveCourses()
         {
-            using (var dBManager = new SchoolDbContext())
+            try
             {
-                var subjectsActive = dBManager.Subjects
-                    .Where(s => (bool)s.IsActive)
-                    .ToList();
-                Console.WriteLine("Active Subjects:");
-                foreach (var subject in subjectsActive)
+                using (var dBManager = new SchoolDbContext())
                 {
-                    Console.WriteLine($"{subject.SubjectName}");
+                    var subjectsActive = dBManager.Subjects
+                        .Where(s => s.IsActive == true)
+                        .ToList();
+                    Console.WriteLine("Active Subjects:");
+                    foreach (var subject in subjectsActive)
+                    {
+                        Console.WriteLine($"{subject.SubjectName}");
+                    }
                 }
             }
-
-            Console.WriteLine("\nPress any key to return to the menu...");
-            Console.ReadKey();
-            Console.Clear();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         // Connection String
-        private static string connectionString = @"Data Source = localhost;Database = SchoolDBLastProject;Integrated Security = True;Trust Server Certificate = True;";
+        private const string connectionString = @"Data Source = localhost;Database = SchoolDBLastProject;Integrated Security = True;Trust Server Certificate = True;";
 
         // Case 4
         public static void EmployeeOverview()
         {
-            string query = "SELECT FirstName, LastName, Profession, YearsWorked FROM Employee";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+            try
             {
-                connection.Open();
+                var query = "SELECT FirstName, LastName, Profession, YearsWorked FROM Employee";
 
-                SqlCommand command = new SqlCommand(query, connection);
-                SqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    string firstName = reader["FirstName"].ToString();
-                    string lastName = reader["LastName"].ToString();
-                    string profession = reader["Profession"].ToString();
-                    int yearsWorked = Convert.ToInt32(reader["YearsWorked"]);
+                    connection.Open();
 
-                    Console.WriteLine($"{firstName} {lastName} - {profession} - {yearsWorked} years in work");
+                    var command = new SqlCommand(query, connection);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var firstName = reader["FirstName"].ToString();
+                            var lastName = reader["LastName"].ToString();
+                            var profession = reader["Profession"].ToString();
+                            var yearsWorked = Convert.ToInt32(reader["YearsWorked"]);
+
+                            Console.WriteLine($"{firstName} {lastName} - {profession} - {yearsWorked} years in work");
+                        }
+                    }
                 }
-
-                reader.Close();
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
 
@@ -188,26 +203,26 @@ namespace Slutprojekt_Serhan_Gyuler
             try 
             {
                 Console.WriteLine("Enter First Name: ");
-                string firstName = Console.ReadLine();
+                var firstName = Console.ReadLine();
 
                 Console.Write("Enter Last Name: ");
-                string lastName = Console.ReadLine();
+                var lastName = Console.ReadLine();
 
                 Console.Write("Enter Profession: ");
-                string profession = Console.ReadLine();
+                var profession = Console.ReadLine();
 
                 Console.Write("Enter Years Worked: ");
-                int yearsWorked = Convert.ToInt32(Console.ReadLine());
+                var yearsWorked = Convert.ToInt32(Console.ReadLine());
 
                 Console.Write("Enter Salary: ");
-                decimal salary = Convert.ToDecimal(Console.ReadLine());
+                var salary = Convert.ToDecimal(Console.ReadLine());
 
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var connection = new SqlConnection(connectionString))
                 {
                     string query = @"INSERT INTO Employee (FirstName, LastName, Profession, YearsWorked, Salary)
                                      VALUES (@FirstName, @LastName, @Profession, @YearsWorked, @Salary)";
 
-                    using (SqlCommand command = new SqlCommand(query, connection))
+                    using (var command = new SqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@FirstName", firstName);
                         command.Parameters.AddWithValue("@LastName", lastName);
@@ -216,21 +231,15 @@ namespace Slutprojekt_Serhan_Gyuler
                         command.Parameters.AddWithValue("@Salary", salary);
 
                         connection.Open();
-                        var rowsAffected = command.ExecuteNonQuery();
-                        Console.WriteLine(rowsAffected);
+
+                        Console.WriteLine($"{firstName} {lastName} was added to employees");
                     }
-                    Console.WriteLine("\nPress any key to return to the menu...");
-                    Console.ReadKey();
-                    Console.Clear();
                 }
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
             }
         }
 
@@ -240,9 +249,9 @@ namespace Slutprojekt_Serhan_Gyuler
             try
             {
                 Console.WriteLine("Enter student ID to see set grades: ");
-                int studentId = Convert.ToInt32(Console.ReadLine());
+                var studentId = Convert.ToInt32(Console.ReadLine());
 
-                string query = @"SELECT 
+                var query = @"SELECT 
                         s.FirstName AS StudentFirstName, 
                         s.LastName AS StudentLastName, 
                         sub.SubjectName, 
@@ -256,127 +265,23 @@ namespace Slutprojekt_Serhan_Gyuler
                         JOIN Employee e ON g.EmployeeId = e.EmployeeId
                         WHERE s.StudentId = @StudentId";
 
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
 
-                    SqlCommand command = new SqlCommand(query, connection);
+                    var command = new SqlCommand(query, connection);
                     command.Parameters.AddWithValue("@StudentId", studentId);
-                    SqlDataReader reader = command.ExecuteReader();
-
-                    while (reader.Read())
+                    using (var reader = command.ExecuteReader())
                     {
-                        string studentName = reader["StudentFirstName"] + " " + reader["StudentLastName"].ToString();
-                        string subject = reader["SubjectName"].ToString();
-                        string teacherName = reader["TeacherFirstName"] + reader["TeacherLastName"].ToString();
-                        string grade = reader["Grades"].ToString();
-                        DateTime dateAssigned = (DateTime)reader["DateAssigned"];
-
-                        Console.WriteLine($"Student: {studentName}, Subject: {subject}, Teacher: {teacherName}, Grade: {grade}, Date: {dateAssigned}");
-                    }
-
-                    reader.Close();
-                    Console.WriteLine("\nPress any key to return to the menu...");
-                    Console.ReadKey();
-                    Console.Clear();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
-            }
-
-        }
-
-        // Case 7
-        public static void SalaryOverview()
-        {
-            string query = "SELECT Profession, SUM(Salary) AS TotalSalary FROM Employee GROUP BY Profession";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                SqlCommand command = new SqlCommand(query, connection);
-                SqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    string profession = reader["profession"].ToString();
-                    decimal totalSalary = Convert.ToDecimal(reader["TotalSalary"]);
-
-                    Console.WriteLine($"{profession}: {totalSalary}kr");
-                }
-
-                reader.Close();
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
-            }
-        }
-
-        // Case 8
-        public static void AverageSalary()
-        {
-            string query = "SELECT Profession, SUM(Salary) AS TotalSalary, COUNT(*) AS EmployeeCount FROM Employee GROUP BY Profession";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-
-                SqlCommand command = new SqlCommand(query, connection);
-                SqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    string profession = reader["Profession"].ToString();
-                    int employeeCount = Convert.ToInt32(reader["EmployeeCount"]);
-                    int totalSalary = Convert.ToInt32(reader["TotalSalary"]);
-                    int averageSalary = totalSalary / employeeCount;
-
-
-                    Console.WriteLine($"Average Salary for {profession}: {averageSalary}");
-                }
-
-                reader.Close();
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
-            }
-        }
-
-        // Case 9
-        public static void StoreProcedure()
-        {
-            try
-            {
-                Console.WriteLine("Enter student ID to view important information");
-                int studentId = Convert.ToInt32(Console.ReadLine());
-                using (SqlConnection connection = new SqlConnection(connectionString))
-                {
-                    connection.Open();
-                    using (SqlCommand command = new SqlCommand("SelectStudentById", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@StudentId", studentId);
-                        using (SqlDataReader reader = command.ExecuteReader())
+                        while (reader.Read())
                         {
-                            while (reader.Read())
-                            {
-                                string firstName = reader["FirstName"].ToString();
-                                string lastName = reader["LastName"].ToString();
-                                string ssn = reader["SocialSecurityNumber"].ToString();
+                            var studentName = reader["StudentFirstName"] + " " + reader["StudentLastName"].ToString();
+                            var subject = reader["SubjectName"].ToString();
+                            var teacherName = reader["TeacherFirstName"] + reader["TeacherLastName"].ToString();
+                            var grade = reader["Grades"].ToString();
+                            var dateAssigned = (DateTime)reader["DateAssigned"];
 
-                                Console.WriteLine($"Student: {firstName} {lastName} ~ SSN:{ssn} ");
-                            }
-
-                            reader.Close();
-                            Console.WriteLine("\nPress any key to return to the menu...");
-                            Console.ReadKey();
-                            Console.Clear();
+                            Console.WriteLine($"Student: {studentName}, Subject: {subject}, Teacher: {teacherName}, Grade: {grade}, Date: {dateAssigned}");
                         }
                     }
                 }
@@ -384,11 +289,102 @@ namespace Slutprojekt_Serhan_Gyuler
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
             }
+        }
 
+        // Case 7
+        public static void SalaryOverview()
+        {
+            try
+            {
+                var query = "SELECT Profession, SUM(Salary) AS TotalSalary FROM Employee GROUP BY Profession";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = new SqlCommand(query, connection);
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var profession = reader["profession"].ToString();
+                            var totalSalary = Convert.ToDecimal(reader["TotalSalary"]);
+
+                            Console.WriteLine($"{profession}: {totalSalary}kr");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        // Case 8
+        public static void AverageSalary()
+        {
+            try
+            {
+                var query = "SELECT Profession, SUM(Salary) AS TotalSalary, COUNT(*) AS EmployeeCount FROM Employee GROUP BY Profession";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    var command = new SqlCommand(query, connection);
+                    using var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        var profession = reader["Profession"].ToString();
+                        var employeeCount = Convert.ToInt32(reader["EmployeeCount"]);
+                        var totalSalary = Convert.ToInt32(reader["TotalSalary"]);
+                        var averageSalary = totalSalary / employeeCount;
+
+                        Console.WriteLine($"Average Salary for {profession}: {averageSalary}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        // Case 9
+        public static void GetImportnatInfoOnStudent()
+        {
+            try
+            {
+                Console.WriteLine("Enter student ID to view important information");
+                var studentId = Convert.ToInt32(Console.ReadLine());
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (var command = new SqlCommand("SelectStudentById", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@StudentId", studentId);
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var firstName = reader["FirstName"].ToString();
+                                var lastName = reader["LastName"].ToString();
+                                var ssn = reader["SocialSecurityNumber"].ToString();
+
+                                Console.WriteLine($"Student: {firstName} {lastName} ~ SSN:{ssn} ");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         // Case 10
@@ -399,17 +395,17 @@ namespace Slutprojekt_Serhan_Gyuler
                 connection.Open();
 
                 // Start a local transaction.
-                SqlTransaction sqlTran = connection.BeginTransaction();
+                var sqlTran = connection.BeginTransaction();
 
                 try
                 {
-                    SqlCommand command = connection.CreateCommand();
+                    var command = connection.CreateCommand();
                     command.Transaction = sqlTran;
 
                     // Subject
                     Console.WriteLine("Subjects:");
                     command.CommandText = "SELECT SubjectName, SubjectId FROM Subject";
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -417,13 +413,13 @@ namespace Slutprojekt_Serhan_Gyuler
                         }
                     }
                     Console.Write("Enter the Subject ID: ");
-                    int subjectId = Convert.ToInt32(Console.ReadLine());
+                    var subjectId = Convert.ToInt32(Console.ReadLine());
 
 
                     // Student
                     Console.WriteLine("Students:");
                     command.CommandText = "SELECT FirstName, LastName, StudentId FROM Student";
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -431,12 +427,12 @@ namespace Slutprojekt_Serhan_Gyuler
                         }
                     }
                     Console.Write("Enter the student's ID: ");
-                    int studentId = Convert.ToInt32(Console.ReadLine());
+                    var studentId = Convert.ToInt32(Console.ReadLine());
 
                     // Grade
                     Console.WriteLine("Choose the grade:\nA\nB\nC\nD\nE\nF");
                     Console.Write("Enter the grade: ");
-                    string grade = Console.ReadLine().ToUpper();
+                    var grade = Console.ReadLine().ToUpper();
 
 
                     // Date
@@ -446,7 +442,7 @@ namespace Slutprojekt_Serhan_Gyuler
                     // Employees
                     Console.WriteLine("Available Teachers:");
                     command.CommandText = "SELECT EmployeeId, FirstName, LastName FROM Employee WHERE Profession = 'Teacher'";
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
@@ -454,7 +450,7 @@ namespace Slutprojekt_Serhan_Gyuler
                         }
                     }
                     Console.Write("Enter the teacher's ID: ");
-                    int teacherId = Convert.ToInt32(Console.ReadLine());
+                    var teacherId = Convert.ToInt32(Console.ReadLine());
 
                     command.CommandText = @"INSERT INTO Grade (StudentId, SubjectId, EmployeeId, Grades, DateAssigned) 
                                             VALUES (@StudentId, @SubjectId, @TeacherId, @Grades, @DateAssigned)";
@@ -464,12 +460,9 @@ namespace Slutprojekt_Serhan_Gyuler
                     command.Parameters.AddWithValue("@Grades", grade);
                     command.Parameters.AddWithValue("@DateAssigned", dateAssigned);
 
-                    int rowsAffected = command.ExecuteNonQuery();
-
                     // If successful finilaze transaction
                     sqlTran.Commit();
                     Console.WriteLine("Grade successfully added!");
-
                 }
                 catch (Exception ex)
                 {
@@ -477,10 +470,6 @@ namespace Slutprojekt_Serhan_Gyuler
                     sqlTran.Rollback();
                     Console.WriteLine($"Error: {ex.Message}");
                 }
-
-                Console.WriteLine("\nPress any key to return to the menu...");
-                Console.ReadKey();
-                Console.Clear();
             }
         }
     }
