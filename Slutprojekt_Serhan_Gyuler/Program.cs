@@ -197,7 +197,7 @@ namespace Slutprojekt_Serhan_Gyuler
             }
         }
 
-        // Case 5
+        // Case 5 //WIP
         public static void AddNewEmployee()
         {
             try 
@@ -231,6 +231,8 @@ namespace Slutprojekt_Serhan_Gyuler
                         command.Parameters.AddWithValue("@Salary", salary);
 
                         connection.Open();
+
+                        command.ExecuteNonQuery();
 
                         Console.WriteLine($"{firstName} {lastName} was added to employees");
                     }
@@ -387,7 +389,7 @@ namespace Slutprojekt_Serhan_Gyuler
             }
         }
 
-        // Case 10
+        // Case 10 //WIP
         public static void AddGradeToStudent()
         {
             using (SqlConnection connection = new(connectionString))
@@ -461,6 +463,7 @@ namespace Slutprojekt_Serhan_Gyuler
                     command.Parameters.AddWithValue("@DateAssigned", dateAssigned);
 
                     // If successful finilaze transaction
+                    command.ExecuteNonQuery();
                     sqlTran.Commit();
                     Console.WriteLine("Grade successfully added!");
                 }
